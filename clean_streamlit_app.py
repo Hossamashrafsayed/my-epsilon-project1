@@ -1,31 +1,34 @@
+
 import streamlit as st
 import pandas as pd
 
+# إعداد صفحة التطبيق
 st.set_page_config(page_title="تحليل البيانات", layout="wide")
-st.title("📊 تحليل ملف CSV باستخدام Streamlit")
 
-# رفع ملف CSV من المستخدم
-uploaded_file = st.file_uploader("📤 قم برفع ملف CSV", type=["csv"])
+# عنوان رئيسي
+st.title("📊 تطبيق Streamlit لتحليل البيانات")
 
-if uploaded_file is not None:
-    try:
-        df = pd.read_csv(uploaded_file)
-        st.subheader("👀 عرض البيانات")
-        st.dataframe(df)
+# تحميل البيانات
+@st.cache_data
+def load_data():
+    return pd.read_csv("sample.csv")
 
-        st.subheader("📈 ملخص إحصائي")
-        st.write(df.describe())
+df = load_data()
 
-        # عرض رسم بياني إذا كان هناك أعمدة رقمية
-        numeric_cols = df.select_dtypes(include=['int64', 'float64']).columns.tolist()
-        if numeric_cols:
-            st.subheader("📉 رسم بياني لعمود رقمي")
-            selected_col = st.selectbox("اختر عمودًا", numeric_cols)
-            st.line_chart(df[selected_col])
-        else:
-            st.info("لا توجد أعمدة رقمية لعرض رسم بياني.")
+# عرض البيانات
+st.subheader("👀 عرض البيانات")
+st.dataframe(df)
 
-    except Exception as e:
-        st.error(f"حدث خطأ أثناء قراءة الملف: {e}")
+# عرض ملخص إحصائي
+st.subheader("📈 ملخص إحصائي")
+st.write(df.describe())
+
+# اختيار عمود للرسم البياني (إن وجد)
+numeric_cols = df.select_dtypes(include=['int64', 'float64']).columns.tolist()
+
+if numeric_cols:
+    st.subheader("📉 رسم بياني لعمود معين")
+    selected_col = st.selectbox("اختر عمودًا رقميًا", numeric_cols)
+    st.line_chart(df[selected_col])
 else:
-    st.info("يرجى رفع ملف CSV للبدء.")
+    st.info("لا توجد أعمدة رقمية لعرض الرسوم البيانية.")
